@@ -10,7 +10,7 @@
       "homepage": "https://www.npmjs.com/package/@agegr/pi-web"
     },
     "@juicesharp/rpiv-ask-user-question": {
-      "version": "^2.1.0",
+"version": "latest",
       "type": "extension",
       "description": "问用户问题 - 结构化问答界面",
       "extensions": ["rpiv-ask-user-question"],
@@ -18,7 +18,7 @@
       "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question"
     },
     "@juicesharp/rpiv-todo": {
-      "version": "^1.0.0",
+"version": "latest",
       "type": "extension",
       "description": "任务管理 - 多步骤任务追踪",
       "extensions": ["rpiv-todo"],
@@ -26,7 +26,7 @@
       "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-todo"
     },
     "@narumitw/pi-goal": {
-      "version": "^0.28.0",
+"version": "latest",
       "type": "extension",
       "description": "目标管理 - 目标追踪和完成验证",
       "extensions": ["pi-goal"],
@@ -34,7 +34,7 @@
       "homepage": "https://www.npmjs.com/package/@narumitw/pi-goal"
     },
     "pi-edit-hooks": {
-      "version": "^0.2.1",
+"version": "latest",
       "type": "extension",
       "description": "编辑钩子 - 文件编辑后自动执行脚本",
       "extensions": ["pi-edit-hooks"],
@@ -50,7 +50,7 @@
       "homepage": "https://github.com/georgebashi/pi-hashline-edit"
     },
     "pi-mcp-adapter": {
-      "version": "^2.6.0",
+"version": "latest",
       "type": "extension",
       "description": "MCP 适配器 - 连接 MCP 服务器",
       "extensions": ["pi-mcp-adapter"],
@@ -58,7 +58,7 @@
       "homepage": "https://www.npmjs.com/package/pi-mcp-adapter"
     },
     "pi-web-access": {
-      "version": "^0.15.0",
+"version": "latest",
       "type": "extension",
       "description": "Web 访问 - 搜索和网页内容获取",
       "extensions": ["pi-web-access"],
