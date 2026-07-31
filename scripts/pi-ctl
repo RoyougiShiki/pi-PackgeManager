@@ -154,6 +154,19 @@ cmd_install() {
   echo -e "${BLUE}安装所有配置的包...${NC}"
 
   mkdir -p "$BUNDLE_DIR"
+  if [[ ! -f "$BUNDLE_DIR/package.json" ]]; then
+    cat > "$BUNDLE_DIR/package.json" << 'EOF'
+{
+  "name": "omi-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {},
+  "pi": {
+    "extensions": []
+  }
+}
+EOF
+  fi
 
   json_keys "$PACKAGES_FILE" | while IFS= read -r pkg; do
     [[ -z "$pkg" ]] && continue
@@ -169,6 +182,23 @@ cmd_install() {
       cd "$BUNDLE_DIR" && npm install "$pkg@$version"
     fi
   done
+
+  # 同步 bundle 的 pi.extensions 列表
+  node -e "
+    const fs = require('fs');
+    const cfg = JSON.parse(fs.readFileSync('$PACKAGES_FILE', 'utf8'));
+    const bundlePath = '$BUNDLE_DIR/package.json';
+    const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
+    const paths = [];
+    for (const [name, meta] of Object.entries(cfg.packages)) {
+      if (meta.installTarget !== 'bundle') continue;
+      if (Array.isArray(meta.extensionPaths)) paths.push(...meta.extensionPaths);
+    }
+    bundle.pi = bundle.pi || {};
+    bundle.pi.extensions = paths;
+    fs.writeFileSync(bundlePath, JSON.stringify(bundle, null, 2) + '\n');
+    console.log('已同步 pi.extensions: ' + paths.length + ' 项');
+  "
 
   echo -e "${GREEN}✓ 所有包安装完成${NC}"
 }
