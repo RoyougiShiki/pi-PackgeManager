@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pi PackageManager Configuration",
+  "type": "object",
+  "required": ["packages"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "packages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["version", "type", "installTarget"],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "npm 版本范围，如 ^1.0.0, latest, github:user/repo"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["tool", "extension"],
+            "description": "tool=独立工具, extension=Pi扩展"
+          },
+          "description": {
+            "type": "string",
+            "description": "包描述"
+          },
+          "extensions": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "包内包含的扩展名列表"
+          },
+          "installTarget": {
+            "type": "string",
+            "enum": ["npm-global", "bundle"],
+            "description": "安装位置: npm-global 或 ~/.pi/bundle"
+          },
+          "homepage": {
+            "type": "string",
+            "description": "包主页或 npm 地址"
+          }
+        }
+      }
+    }
+  }
+}

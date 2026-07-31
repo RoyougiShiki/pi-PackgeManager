@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Cache
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+.idea/
+.vscode/
