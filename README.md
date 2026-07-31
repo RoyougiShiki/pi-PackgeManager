@@ -33,11 +33,14 @@ chmod +x install.sh scripts/pi-ctl
 
 安装后：
 
-- `piweb` / `pi-web`：Web UI（npm global）
+- `piweb`：启动 Pi Web（后台运行，自动检查更新）
+- `piweb update`：更新 Pi Web 到最新版本
+- `piweb-stop`：停止 Pi Web
+- `pi-ctl`：包清单管理
 - 扩展：安装到 `~/.pi/bundle/`
-- 命令：`pi-ctl` 链接到 `~/.npm-global/bin/`
-
 ## 命令行备用
+
+### pi-ctl（包清单管理）
 
 ```bash
 pi-ctl list              # 查看清单
@@ -48,6 +51,17 @@ pi-ctl install           # 按清单安装
 pi-ctl add <包名>        # 写入清单
 pi-ctl remove <包名>     # 从清单移除
 ```
+
+### piweb（Pi Web 启动包装）
+
+```bash
+piweb           # 启动 Pi Web（后台运行，自动检查更新）
+piweb update    # 更新到最新版本
+piweb version   # 显示当前/最新版本
+piweb-stop      # 停止 Pi Web
+```
+
+版本策略：清单统一使用 `latest`（GitHub 源包除外）。
 
 版本策略：清单统一使用 `latest`（GitHub 源包除外）。
 
@@ -103,6 +117,8 @@ pi-ctl remove <包名>     # 从清单移除
 | pi-web-access | extension | Web 搜索/抓取 |
 
 ## 依赖
+
+- Node.js / npm
 
 - Node.js / npm
 - 可选：已有的 `piweb` 启动脚本（本仓库不内嵌 piweb 本体脚本）

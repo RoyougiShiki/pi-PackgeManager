@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# 一键启动 Pi Web：本机访问、不弹 WSL 浏览器
+# 支持：piweb          # 启动（自动检查更新）
+#       piweb update   # 更新到最新版本
+#       piweb version  # 显示版本信息
+set -euo pipefail
+
+PORT="${PI_WEB_PORT:-30141}"
+HOST="${PI_WEB_HOST:-127.0.0.1}"
+URL="http://${HOST}:${PORT}"
+LOG="${PI_WEB_LOG:-/tmp/pi-web.log}"
+CACHE_FILE="${PI_WEB_CACHE:-$HOME/.cache/pi-web-version.cache}"
+CACHE_TTL="${PI_WEB_CACHE_TTL:-86400}"  # 默认 24 小时
+
+# ========== 子命令处理 ==========
+if [[ "${1:-}" == "update" ]]; then
+  echo "正在更新 @agegr/pi-web..."
+  npm install -g @agegr/pi-web@latest
+  echo "✅ 更新完成！"
+  npm list -g @agegr/pi-web --depth=0
+  exit 0
+fi
+
+if [[ "${1:-}" == "version" ]]; then
+  INSTALLED=$(npm list -g @agegr/pi-web --depth=0 2>/dev/null | grep @agegr/pi-web | sed 's/.*@//' || echo "unknown")
+  LATEST=$(npm info @agegr/pi-web version 2>/dev/null || echo "unknown")
+  echo "当前版本: ${INSTALLED}"
+  echo "最新版本: ${LATEST}"
+  if [[ "$INSTALLED" != "$LATEST" && "$INSTALLED" != "unknown" && "$LATEST" != "unknown" ]]; then
+    echo "⚠️  有新版本可用！运行 'piweb update' 更新"
+  fi
+  exit 0
+fi
+
+# ========== 版本检查函数 ==========
+check_update() {
+  # 跳过检查（环境变量控制）
+  [[ "${PI_WEB_SKIP_UPDATE_CHECK:-}" == "1" ]] && return 0
+  
+  local installed latest cache_ok=0
+  
+  # 从缓存读取（避免每次启动都查 npm）
+  if [[ -f "$CACHE_FILE" ]]; then
+    local cache_age=$(( $(date +%s) - $(date -r "$CACHE_FILE" +%s 2>/dev/null || echo 0) ))
+    if [[ $cache_age -lt $CACHE_TTL ]]; then
+      cache_ok=1
+      latest=$(cat "$CACHE_FILE" 2>/dev/null || echo "")
+    fi
+  fi
+  
+  # 缓存过期或不存在，查询 npm
+  if [[ $cache_ok -eq 0 ]]; then
+    latest=$(npm info @agegr/pi-web version 2>/dev/null || echo "")
+    if [[ -n "$latest" ]]; then
+      mkdir -p "$(dirname "$CACHE_FILE")"
+      echo "$latest" > "$CACHE_FILE"
+    fi
+  fi
+  
+  # 获取当前安装版本
+  installed=$(npm list -g @agegr/pi-web --depth=0 2>/dev/null | grep @agegr/pi-web | sed 's/.*@//' || echo "")
+  
+  # 比较版本
+  if [[ -n "$installed" && -n "$latest" && "$installed" != "$latest" ]]; then
+    echo "⚠️  Pi Web 有新版本可用: $installed → $latest"
+    echo "   运行 'piweb update' 更新"
+  fi
+}
+
+# ========== 启动逻辑 ==========
+is_up() {
+  curl -fsS --max-time 2 "${URL}/" >/dev/null 2>&1
+}
+
+open_windows_browser() {
+  # 在 Windows 侧打开，避免 xdg-open 弹 WSL 浏览器
+  if command -v cmd.exe >/dev/null 2>&1; then
+    cmd.exe /c start "" "${URL}" >/dev/null 2>&1 || true
+  elif command -v powershell.exe >/dev/null 2>&1; then
+    powershell.exe -NoProfile -Command "Start-Process '${URL}'" >/dev/null 2>&1 || true
+  fi
+}
+
+if is_up; then
+  echo "Pi Web 已在运行：${URL}"
+  open_windows_browser
+  check_update
+  exit 0
+fi
+
+# 清掉卡住的旧 next 进程（仅本机 30141 场景）
+if command -v pgrep >/dev/null 2>&1; then
+  pgrep -af 'next-server|next/dist/bin/next start' 2>/dev/null | rg -q . && {
+    pkill -f 'next/dist/bin/next start' 2>/dev/null || true
+    pkill -f 'next-server' 2>/dev/null || true
+    sleep 1
+  } || true
+fi
+
+if ! command -v pi-web >/dev/null 2>&1; then
+  echo "未找到 pi-web，请先：npm install -g @agegr/pi-web" >&2
+  exit 1
+fi
+
+nohup env PI_WEB_NO_OPEN=1 pi-web --no-open -H "${HOST}" -p "${PORT}" >"${LOG}" 2>&1 &
+PID=$!
+
+for _ in $(seq 1 30); do
+  if is_up; then
+    echo "Pi Web 已启动：${URL}"
+    echo "日志：${LOG}  PID：${PID}"
+    echo "Windows 浏览器打开上述地址即可（或已尝试自动打开）。"
+    open_windows_browser
+    check_update
+    exit 0
+  fi
+  # 进程提前退出
+  if ! kill -0 "${PID}" 2>/dev/null; then
+    echo "启动失败，最近日志：" >&2
+    tail -n 40 "${LOG}" >&2 || true
+    exit 1
+  fi
+  sleep 0.3
+done
+
+echo "启动超时，最近日志：" >&2
+tail -n 40 "${LOG}" >&2 || true
+exit 1

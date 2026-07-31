@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# 停止 Pi Web
+set -euo pipefail
+
+PORT="${PI_WEB_PORT:-30141}"
+
+pkill -f 'next/dist/bin/next start' 2>/dev/null || true
+pkill -f 'next-server' 2>/dev/null || true
+# 保险：按端口杀（若 fuser 可用）
+if command -v fuser >/dev/null 2>&1; then
+  fuser -k "${PORT}/tcp" 2>/dev/null || true
+fi
+
+sleep 0.5
+if curl -fsS --max-time 1 "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then
+  echo "仍有服务在监听 ${PORT}，请手动检查：ss -ltnp | rg ${PORT}"
+  exit 1
+fi
+
+echo "Pi Web 已停止"
