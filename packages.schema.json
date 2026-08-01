@@ -15,7 +15,7 @@
         "properties": {
           "version": {
             "type": "string",
-            "description": "npm 版本范围，如 ^1.0.0, latest, github:user/repo"
+            "description": "版本标识：npm 版本范围(如 ^1.0.0, latest, github:user/repo)，或 git 包的 branch 名称"
           },
           "type": {
             "type": "string",
@@ -33,8 +33,21 @@
           },
           "installTarget": {
             "type": "string",
-            "enum": ["npm-global", "bundle"],
-            "description": "安装位置: npm-global 或 ~/.pi/bundle"
+            "enum": ["npm-global", "bundle", "git"],
+            "description": "安装位置: npm-global=全局npm, bundle=~/.pi/bundle, git=~/.pi/packages(git clone)"
+          },
+          "repoUrl": {
+            "type": "string",
+            "description": "git 仓库 URL（installTarget=git 时必填）"
+          },
+          "branch": {
+            "type": "string",
+            "description": "git 分支（installTarget=git 时使用；默认取仓库默认分支）"
+          },
+          "extensionPaths": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Pi 扩展相对路径列表（供 settings.json 引用）"
           },
           "homepage": {
             "type": "string",

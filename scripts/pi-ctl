@@ -7,6 +7,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 PACKAGES_FILE="$REPO_DIR/packages.json"
 BUNDLE_DIR="$HOME/.pi/bundle"
+GIT_DIR="$HOME/.pi/packages"
 
 # 颜色
 RED='\033[0;31m'
@@ -60,12 +61,60 @@ get_installed_version() {
 
   if [[ "$target" == "npm-global" ]]; then
     npm list -g "$pkg" --depth=0 2>/dev/null | grep -E "^└──|^├──" | sed 's/.*@//' | head -1 || echo "not installed"
+  elif [[ "$target" == "git" ]]; then
+    if [[ -d "$GIT_DIR/$pkg/.git" ]]; then
+      git -C "$GIT_DIR/$pkg" rev-parse --short HEAD 2>/dev/null || echo "not installed"
+    else
+      echo "not installed"
+    fi
   else
     if [[ -f "$BUNDLE_DIR/package.json" ]]; then
       (cd "$BUNDLE_DIR" && npm list "$pkg" --depth=0 2>/dev/null | grep -E "^└──|^├──" | sed 's/.*@//' | head -1) || echo "not installed"
     else
       echo "not installed"
     fi
+  fi
+}
+
+# git 包: 最新版本 = 远程分支 HEAD
+get_git_latest() {
+  local pkg="$1"
+  local repo_url branch
+  repo_url=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.repoUrl||'')")
+  branch=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.branch||'')")
+  if [[ -z "$repo_url" ]]; then echo "unknown"; return; fi
+  if [[ -n "$branch" ]]; then
+    git ls-remote --heads "$repo_url" "$branch" 2>/dev/null | head -1 | cut -c1-7 || echo "unknown"
+  else
+    git ls-remote --symref "$repo_url" HEAD 2>/dev/null | grep 'ref: refs/heads' | awk '{print $2}' | sed 's|refs/heads/||' || echo "unknown"
+  fi
+}
+
+# git 包: 安装/更新 (clone 或 pull + checkout 指定分支)
+git_sync() {
+  local pkg="$1"
+  local repo_url branch
+  repo_url=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.repoUrl||'')")
+  branch=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.branch||'')")
+  if [[ -z "$repo_url" ]]; then
+    echo -e "${RED}✗ $pkg: 缺少 repoUrl${NC}"
+    return 1
+  fi
+  mkdir -p "$GIT_DIR"
+  if [[ ! -d "$GIT_DIR/$pkg/.git" ]]; then
+    echo "  git clone $repo_url -> $GIT_DIR/$pkg"
+    if [[ -n "$branch" ]]; then
+      git clone --branch "$branch" "$repo_url" "$GIT_DIR/$pkg" 2>&1 | tail -2 || { echo -e "${RED}✗ $pkg clone 失败${NC}"; return 1; }
+    else
+      git clone "$repo_url" "$GIT_DIR/$pkg" 2>&1 | tail -2 || { echo -e "${RED}✗ $pkg clone 失败${NC}"; return 1; }
+    fi
+  else
+    echo "  git pull + checkout $GIT_DIR/$pkg"
+    git -C "$GIT_DIR/$pkg" fetch origin 2>&1 | tail -1 || true
+    if [[ -n "$branch" ]]; then
+      git -C "$GIT_DIR/$pkg" checkout "$branch" 2>&1 | tail -1 || true
+    fi
+    git -C "$GIT_DIR/$pkg" pull --ff-only 2>&1 | tail -1 || true
   fi
 }
 
@@ -87,7 +136,11 @@ cmd_status() {
     installed=$(get_installed_version "$pkg" "$target")
 
     if [[ "${PI_CTL_SKIP_UPDATE_CHECK:-}" != "1" ]]; then
-      latest=$(get_latest_version "$pkg")
+      if [[ "$target" == "git" ]]; then
+        latest=$(get_git_latest "$pkg")
+      else
+        latest=$(get_latest_version "$pkg")
+      fi
     else
       latest="-"
     fi
@@ -126,6 +179,8 @@ cmd_update() {
     echo -e "${BLUE}更新 $pkg...${NC}"
     if [[ "$target" == "npm-global" ]]; then
       npm install -g "$pkg@latest"
+    elif [[ "$target" == "git" ]]; then
+      git_sync "$pkg"
     else
       cd "$BUNDLE_DIR" && npm install "$pkg@latest"
     fi
@@ -142,6 +197,8 @@ cmd_update() {
       echo -e "${BLUE}更新 $p...${NC}"
       if [[ "$target" == "npm-global" ]]; then
         npm install -g "$p@latest" 2>/dev/null && echo -e "${GREEN}✓${NC} $p" || echo -e "${RED}✗${NC} $p"
+      elif [[ "$target" == "git" ]]; then
+        git_sync "$p" && echo -e "${GREEN}✓${NC} $p" || echo -e "${RED}✗${NC} $p"
       else
         cd "$BUNDLE_DIR" && npm install "$p@latest" 2>/dev/null && echo -e "${GREEN}✓${NC} $p" || echo -e "${RED}✗${NC} $p"
       fi
@@ -178,6 +235,8 @@ EOF
     echo -e "${BLUE}安装 $pkg@$version...${NC}"
     if [[ "$target" == "npm-global" ]]; then
       npm install -g "$pkg@$version"
+    elif [[ "$target" == "git" ]]; then
+      git_sync "$pkg"
     else
       cd "$BUNDLE_DIR" && npm install "$pkg@$version"
     fi
@@ -245,6 +304,12 @@ cmd_remove() {
 
   echo -e "${BLUE}从配置移除 $pkg...${NC}"
 
+  local target
+  target=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.installTarget||'')")
+  if [[ "$target" == "git" ]]; then
+    rm -rf "$GIT_DIR/$pkg"
+    echo "  已删除本地目录 $GIT_DIR/$pkg"
+  fi
   node -e "
     const fs = require('fs');
     const data = JSON.parse(fs.readFileSync('$PACKAGES_FILE', 'utf8'));

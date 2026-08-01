@@ -9,6 +9,17 @@
       "installTarget": "npm-global",
       "homepage": "https://www.npmjs.com/package/@agegr/pi-web"
     },
+    "oh-my-opencode-slim": {
+      "version": "refactor/mode-first-stabilization",
+      "type": "extension",
+      "description": "OMO slim Pi adapter - 轻量多 agent 协调层（git 源码仓库）",
+      "extensions": ["oh-my-opencode-slim"],
+      "installTarget": "git",
+      "repoUrl": "https://github.com/RoyougiShiki/oh-my-opencode-slim.git",
+      "branch": "refactor/mode-first-stabilization",
+      "extensionPaths": ["src/pi/core/pi.ts"],
+      "homepage": "https://github.com/RoyougiShiki/oh-my-opencode-slim"
+    },
     "@juicesharp/rpiv-ask-user-question": {
       "version": "latest",
       "type": "extension",
