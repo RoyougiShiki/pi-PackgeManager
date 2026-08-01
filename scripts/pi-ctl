@@ -9,6 +9,12 @@ PACKAGES_FILE="$REPO_DIR/packages.json"
 BUNDLE_DIR="$HOME/.pi/bundle"
 GIT_DIR="$HOME/.pi/packages"
 
+# npm 全局前缀：若系统 prefix 不可写（如 /usr），回退到用户级 ~/.npm-global
+if [[ ! -w "$(npm config get prefix 2>/dev/null || echo /nonexistent)" ]]; then
+  export NPM_CONFIG_PREFIX="${NPM_CONFIG_PREFIX:-$HOME/.npm-global}"
+  export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
+fi
+
 # 颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
