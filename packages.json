@@ -56,14 +56,14 @@
       "installTarget": "bundle",
       "homepage": "https://www.npmjs.com/package/pi-edit-hooks"
     },
-    "pi-hashline-edit": {
-      "version": "github:georgebashi/pi-hashline-edit",
+    "pi-hashline-edit-pro": {
+      "version": "latest",
       "type": "extension",
-      "description": "Hashline 编辑 - 基于 LINE#ID 的精确编辑",
-      "extensions": ["pi-hashline-edit"],
-      "extensionPaths": ["node_modules/pi-hashline-edit/index.ts"],
+      "description": "Hashline 编辑 Pro - 基于内容哈希(3 字符锚点)的精确编辑",
+      "extensions": ["pi-hashline-edit-pro"],
+      "extensionPaths": ["node_modules/pi-hashline-edit-pro/index.ts"],
       "installTarget": "bundle",
-      "homepage": "https://github.com/georgebashi/pi-hashline-edit"
+      "homepage": "https://www.npmjs.com/package/pi-hashline-edit-pro"
     },
     "pi-mcp-adapter": {
       "version": "latest",

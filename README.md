@@ -112,7 +112,7 @@ piweb-stop      # 停止 Pi Web
 | @juicesharp/rpiv-todo | extension | 任务列表 |
 | @narumitw/pi-goal | extension | 目标管理 |
 | pi-edit-hooks | extension | 编辑钩子 |
-| pi-hashline-edit | extension | Hashline 编辑 |
+| pi-hashline-edit-pro | extension | Hashline 编辑 Pro (哈希锚点) |
 | pi-mcp-adapter | extension | MCP 适配器 |
 | pi-web-access | extension | Web 搜索/抓取 |
 
