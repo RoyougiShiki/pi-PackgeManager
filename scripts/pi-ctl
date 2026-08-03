@@ -45,6 +45,7 @@ Pi 包管理器
   update              更新所有包
   update <包名>       更新指定包
   install             安装所有配置的包
+  sync-agent          同步 ~/.pi/agent/settings.json 的受管包扩展(真源: packages.json)
   add <包名> [版本]   添加包到配置
   remove <包名>       从配置移除包
   list                列出所有配置的包
@@ -122,6 +123,54 @@ git_sync() {
     fi
     git -C "$GIT_DIR/$pkg" pull --ff-only 2>&1 | tail -1 || true
   fi
+}
+# 同步 ~/.pi/agent/settings.json 中受管包的扩展列表（真源: packages.json）
+sync_agent_settings() {
+  node -e "
+    const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
+
+    const cfg = JSON.parse(fs.readFileSync('$PACKAGES_FILE', 'utf8'));
+    const sPath = path.join(os.homedir(), '.pi', 'agent', 'settings.json');
+    if (!fs.existsSync(sPath)) {
+      console.log('  跳过: ~/.pi/agent/settings.json 不存在（先复制/初始化 agent 配置）');
+      process.exit(0);
+    }
+    const settings = JSON.parse(fs.readFileSync(sPath, 'utf8'));
+    settings.packages = settings.packages || [];
+    const toExpr = (s) => (s.startsWith('+') ? s : '+' + s);
+
+    const managed = [];
+    // bundle 包 → 单个 source（沿用现有 source 写法，默认 ../bundle）
+    const bundleEntries = Object.entries(cfg.packages).filter(([, p]) => p.installTarget === 'bundle');
+    const oldBundle = settings.packages.find((p) => String(p.source || '').includes('bundle'));
+    const bundleSource = oldBundle ? oldBundle.source : (os.homedir() + '/.pi/bundle');
+    managed.push({
+      source: bundleSource,
+      extensions: bundleEntries.flatMap(([, m]) => (m.extensionPaths || []).map(toExpr)),
+    });
+    // git 包 → 每个包一个条目
+    const gitRoot = path.join(os.homedir(), '.pi', 'packages');
+    for (const [name, m] of Object.entries(cfg.packages)) {
+      if (m.installTarget !== 'git') continue;
+      managed.push({ source: path.join(gitRoot, name), extensions: (m.extensionPaths || []).map(toExpr) });
+    }
+
+    // 合并: 受管 source 替换/新增, 其余条目保留
+    const result = [];
+    const consumed = new Set();
+    for (const p of settings.packages) {
+      const m = managed.find((mm) => mm.source === p.source);
+      if (m && !consumed.has(m.source)) { result.push(m); consumed.add(m.source); }
+      else if (!m) result.push(p);
+    }
+    for (const m of managed) if (!consumed.has(m.source)) { result.push(m); consumed.add(m.source); }
+
+    settings.packages = result;
+    fs.writeFileSync(sPath, JSON.stringify(settings, null, 2) + '\n');
+    console.log('  已同步受管包扩展: ' + managed.length + ' 个 source, packages 共 ' + result.length + ' 项');
+  "
 }
 
 # status 命令
@@ -264,6 +313,9 @@ EOF
     fs.writeFileSync(bundlePath, JSON.stringify(bundle, null, 2) + '\n');
     console.log('已同步 pi.extensions: ' + paths.length + ' 项');
   "
+  
+  # 同步 ~/.pi/agent/settings.json 的受管包扩展（真源: packages.json）
+  sync_agent_settings
 
   echo -e "${GREEN}✓ 所有包安装完成${NC}"
 }
@@ -343,6 +395,7 @@ case "${1:-}" in
   status)     cmd_status ;;
   update)     cmd_update "${2:-}" ;;
   install)    cmd_install ;;
+  sync-agent)  sync_agent_settings ;;
   add)        cmd_add "${2:-}" "${3:-}" "${4:-}" "${5:-}" ;;
   remove)     cmd_remove "${2:-}" ;;
   list)       cmd_list ;;

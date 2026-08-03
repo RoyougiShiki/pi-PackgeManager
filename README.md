@@ -52,6 +52,8 @@ pi-ctl add <包名>        # 写入清单
 pi-ctl remove <包名>     # 从清单移除
 ```
 
+> **唯一真源**: `packages.json` 同时驱动 bundle 的 npm 依赖、`pi.extensions` 和 `~/.pi/agent/settings.json` 的受管扩展列表。新增/替换扩展只需改 `packages.json`, 然后 `pi-ctl install`(自动同步 settings)或 `pi-ctl sync-agent`(仅同步 settings, 不重装)
+
 ### piweb（Pi Web 启动包装）
 
 ```bash
