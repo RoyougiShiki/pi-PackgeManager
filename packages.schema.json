@@ -2,7 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Pi PackageManager Configuration",
   "type": "object",
-  "required": ["packages"],
+  "required": [
+    "packages"
+  ],
   "properties": {
     "$schema": {
       "type": "string"
@@ -11,7 +13,11 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["version", "type", "installTarget"],
+        "required": [
+          "version",
+          "type",
+          "installTarget"
+        ],
         "properties": {
           "version": {
             "type": "string",
@@ -19,7 +25,10 @@
           },
           "type": {
             "type": "string",
-            "enum": ["tool", "extension"],
+            "enum": [
+              "tool",
+              "extension"
+            ],
             "description": "tool=独立工具, extension=Pi扩展"
           },
           "description": {
@@ -28,12 +37,18 @@
           },
           "extensions": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": {
+              "type": "string"
+            },
             "description": "包内包含的扩展名列表"
           },
           "installTarget": {
             "type": "string",
-            "enum": ["npm-global", "bundle", "git"],
+            "enum": [
+              "npm-global",
+              "bundle",
+              "git"
+            ],
             "description": "安装位置: npm-global=全局npm, bundle=~/.pi/bundle, git=~/.pi/packages(git clone)"
           },
           "repoUrl": {
@@ -46,12 +61,18 @@
           },
           "extensionPaths": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": {
+              "type": "string"
+            },
             "description": "Pi 扩展相对路径列表（供 settings.json 引用）"
           },
           "homepage": {
             "type": "string",
             "description": "包主页或 npm 地址"
+          },
+          "category": {
+            "type": "string",
+            "description": "包分类：bridge=对话桥接, ui=界面, task=任务管理, web=Web 工具, mcp=MCP 适配, tool=独立工具 等（可选）"
           }
         }
       }

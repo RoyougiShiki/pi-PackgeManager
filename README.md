@@ -95,6 +95,7 @@ piweb-stop      # 停止 Pi Web
 | `type` | `tool` 独立工具 / `extension` Pi 扩展 |
 | `installTarget` | `npm-global` 或 `bundle`（`~/.pi/bundle`） |
 | `extensions` | 该包启用的扩展名 |
+| `category` | 包分类（可选）：`bridge` 桥接 / `ui` 界面 / `task` 任务 / `web` Web / `mcp` MCP / `tool` 工具 |
 | `version` | 通常为 `latest` |
 
 ## 与其他仓库的关系
@@ -117,6 +118,7 @@ piweb-stop      # 停止 Pi Web
 | pi-hashline-edit-pro | extension | Hashline 编辑 Pro (哈希锚点) |
 | pi-mcp-adapter | extension | MCP 适配器 |
 | pi-web-access | extension | Web 搜索/抓取 |
+| pi-feishu-lark | extension | 飞书/Lark 桥接（手机对话 Pi，长连接） |
 
 ## 依赖
 
