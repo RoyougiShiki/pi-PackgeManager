@@ -53,7 +53,11 @@
           },
           "repoUrl": {
             "type": "string",
-            "description": "git 仓库 URL（installTarget=git 时必填）"
+            "description": "git 仓库 URL（installTarget=git 时必填；installTarget=bundle 时若配 gitUrl 则忽略）"
+          },
+          "gitUrl": {
+            "type": "string",
+            "description": "git 依赖 spec（installTarget=bundle 时可选）：npm 的 github:user/repo#branch 形式，装进 ~/.pi/bundle/node_modules。如 github:RoyougiShiki/Pi-shiki-subagents#refactor/mode-first-stabilization"
           },
           "branch": {
             "type": "string",

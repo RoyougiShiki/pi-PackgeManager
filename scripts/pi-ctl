@@ -237,7 +237,7 @@ cmd_update() {
     elif [[ "$target" == "git" ]]; then
       git_sync "$pkg"
     else
-      cd "$BUNDLE_DIR" && npm install "$pkg@latest"
+      bundle_install "$pkg" "latest"
     fi
     echo -e "${GREEN}✓ $pkg 更新完成${NC}"
   else
@@ -255,13 +255,28 @@ cmd_update() {
       elif [[ "$target" == "git" ]]; then
         git_sync "$p" && echo -e "${GREEN}✓${NC} $p" || echo -e "${RED}✗${NC} $p"
       else
-        cd "$BUNDLE_DIR" && npm install "$p@latest" 2>/dev/null && echo -e "${GREEN}✓${NC} $p" || echo -e "${RED}✗${NC} $p"
+        bundle_install "$p" "latest" 2>/dev/null && echo -e "${GREEN}✓${NC} $p" || echo -e "${RED}✗${NC} $p"
       fi
     done
   fi
 }
 
 # install 命令
+# 安装包到 bundle（installTarget=bundle）:
+# - 有 gitUrl 时: npm install <gitUrl>（git 依赖装进 bundle/node_modules）
+# - 否则: npm install <pkg>@<version>（npm registry）
+bundle_install() {
+  local pkg="$1" version="$2"
+  local git_url
+  git_url=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.gitUrl||'')")
+  if [[ -n "$git_url" ]]; then
+    echo "  [bundle-git] npm install $git_url"
+    (cd "$BUNDLE_DIR" && npm install "$git_url" 2>&1 | tail -2)
+  else
+    (cd "$BUNDLE_DIR" && npm install "$pkg@$version" 2>&1 | tail -2)
+  fi
+}
+
 cmd_install() {
   echo -e "${BLUE}安装所有配置的包...${NC}"
 
@@ -293,7 +308,7 @@ EOF
     elif [[ "$target" == "git" ]]; then
       git_sync "$pkg"
     else
-      cd "$BUNDLE_DIR" && npm install "$pkg@$version"
+      bundle_install "$pkg" "$version"
     fi
   done
 
