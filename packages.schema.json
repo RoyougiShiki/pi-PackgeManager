@@ -77,6 +77,10 @@
           "category": {
             "type": "string",
             "description": "包分类：bridge=对话桥接, ui=界面, task=任务管理, web=Web 工具, mcp=MCP 适配, tool=独立工具 等（可选）"
+          },
+          "disabled": {
+            "type": "boolean",
+            "description": "true=保留条目但不安装/不注册扩展（禁用）"
           }
         }
       }

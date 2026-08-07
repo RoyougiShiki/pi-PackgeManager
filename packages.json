@@ -22,7 +22,8 @@
         "node_modules/@juicesharp/rpiv-ask-user-question/index.ts"
       ],
       "installTarget": "bundle",
-      "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question"
+      "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question",
+      "disabled": true
     },
     "@juicesharp/rpiv-todo": {
       "version": "latest",
@@ -35,7 +36,8 @@
         "node_modules/@juicesharp/rpiv-todo/index.ts"
       ],
       "installTarget": "bundle",
-      "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-todo"
+      "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-todo",
+      "disabled": true
     },
     "@narumitw/pi-goal": {
       "version": "latest",
@@ -127,7 +129,7 @@
       "repoUrl": "https://github.com/RoyougiShiki/Pi-shiki-subagents.git",
       "branch": "refactor/mode-first-stabilization",
       "extensionPaths": [
-        "node_modules/pi-shiki-subagents/src/pi/core/pi.ts"
+        "node_modules/pi-shiki-subagents/src/pi/core/pi-shiki-subagents.ts"
       ],
       "homepage": "https://github.com/RoyougiShiki/Pi-shiki-subagents",
       "gitUrl": "github:RoyougiShiki/Pi-shiki-subagents#refactor/mode-first-stabilization"

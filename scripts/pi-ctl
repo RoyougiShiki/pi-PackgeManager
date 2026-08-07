@@ -143,7 +143,7 @@ sync_agent_settings() {
 
     const managed = [];
     // bundle 包 → 单个 source（沿用现有 source 写法，默认 ../bundle）
-    const bundleEntries = Object.entries(cfg.packages).filter(([, p]) => p.installTarget === 'bundle');
+    const bundleEntries = Object.entries(cfg.packages).filter(([, p]) => !p.disabled && p.installTarget === 'bundle');
     const oldBundle = settings.packages.find((p) => String(p.source || '').includes('bundle'));
     const bundleSource = oldBundle ? oldBundle.source : (os.homedir() + '/.pi/bundle');
     managed.push({
@@ -153,6 +153,7 @@ sync_agent_settings() {
     // git 包 → 每个包一个条目
     const gitRoot = path.join(os.homedir(), '.pi', 'packages');
     for (const [name, m] of Object.entries(cfg.packages)) {
+      if (m.disabled) continue;
       if (m.installTarget !== 'git') continue;
       managed.push({ source: path.join(gitRoot, name), extensions: (m.extensionPaths || []).map(toExpr) });
     }
@@ -182,6 +183,7 @@ cmd_status() {
 
   json_keys "$PACKAGES_FILE" | while IFS= read -r pkg; do
     [[ -z "$pkg" ]] && continue
+    if [[ "$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.disabled||false)")" == "true" ]]; then continue; fi
 
     local type target installed latest status color
 
@@ -245,6 +247,7 @@ cmd_update() {
 
     json_keys "$PACKAGES_FILE" | while IFS= read -r p; do
       [[ -z "$p" ]] && continue
+      if [[ "$(json_get "$PACKAGES_FILE" "console.log(data.packages['$p']?.disabled||false)")" == "true" ]]; then continue; fi
 
       local target
       target=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$p']?.installTarget||'')")
@@ -270,8 +273,21 @@ bundle_install() {
   local git_url
   git_url=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.gitUrl||'')")
   if [[ -n "$git_url" ]]; then
-    echo "  [bundle-git] npm install $git_url"
-    (cd "$BUNDLE_DIR" && npm install "$git_url" 2>&1 | tail -2)
+    # github:user/repo#branch → git+https://github.com/user/repo.git#branch
+    # (github: 简写会让 npm 走 SSH; 显式 git+https 用现有 HTTPS 凭据)
+    local https_url
+    if [[ "$git_url" == github:* ]]; then
+      # github:user/repo#branch → git+https://github.com/user/repo.git#branch
+      local repo_branch="${git_url#github:}"
+      local repo="${repo_branch%%#*}"
+      local branch="${repo_branch#*#}"
+      https_url="git+https://github.com/${repo%.git}.git"
+      [[ "$branch" != "$repo_branch" ]] && https_url="${https_url}#${branch}"
+    else
+      https_url="$git_url"
+    fi
+    echo "  [bundle-git] npm install $https_url"
+    (cd "$BUNDLE_DIR" && npm install "$https_url" 2>&1 | tail -2)
   else
     (cd "$BUNDLE_DIR" && npm install "$pkg@$version" 2>&1 | tail -2)
   fi
@@ -297,6 +313,7 @@ EOF
 
   json_keys "$PACKAGES_FILE" | while IFS= read -r pkg; do
     [[ -z "$pkg" ]] && continue
+    if [[ "$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.disabled||false)")" == "true" ]]; then continue; fi
 
     local target version
     target=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.installTarget||'')")
@@ -320,6 +337,7 @@ EOF
     const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
     const paths = [];
     for (const [name, meta] of Object.entries(cfg.packages)) {
+      if (meta.disabled) continue;
       if (meta.installTarget !== 'bundle') continue;
       if (Array.isArray(meta.extensionPaths)) paths.push(...meta.extensionPaths);
     }
