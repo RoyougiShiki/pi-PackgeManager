@@ -132,7 +132,8 @@
         "node_modules/pi-shiki-subagents/src/pi/core/pi-shiki-subagents.ts"
       ],
       "homepage": "https://github.com/RoyougiShiki/Pi-shiki-subagents",
-      "gitUrl": "github:RoyougiShiki/Pi-shiki-subagents#refactor/mode-first-stabilization"
+      "gitUrl": "github:RoyougiShiki/Pi-shiki-subagents#refactor/mode-first-stabilization",
+      "bundleDir": ".pi/bundle-pi-shiki"
     },
     "pi-shiki-todo": {
       "version": "master",
@@ -148,7 +149,8 @@
       "extensionPaths": [
         "node_modules/pi-shiki-todo/index.ts"
       ],
-      "homepage": "https://github.com/RoyougiShiki/Pi-shiki-todo"
+      "homepage": "https://github.com/RoyougiShiki/Pi-shiki-todo",
+      "bundleDir": ".pi/bundle-pi-shiki"
     }
   }
 }

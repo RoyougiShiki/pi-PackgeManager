@@ -142,14 +142,26 @@ sync_agent_settings() {
     const toExpr = (s) => (s.startsWith('+') ? s : '+' + s);
 
     const managed = [];
-    // bundle 包 → 单个 source（沿用现有 source 写法，默认 ../bundle）
-    const bundleEntries = Object.entries(cfg.packages).filter(([, p]) => !p.disabled && p.installTarget === 'bundle');
+    // bundle 包 → 按 bundleDir 分组, 每组一个 source。
+    // 无 bundleDir 的归默认 ~/.pi/bundle（沿用现有 source 写法，默认 ../bundle）;
+    // 有 bundleDir 的用各自目录作为独立 source（自有扩展集合与第三方分开）。
+    const DEFAULT_BUNDLE = os.homedir() + '/.pi/bundle';
+    const bundleGroups = new Map();
+    for (const [name, m] of Object.entries(cfg.packages)) {
+      if (m.disabled || m.installTarget !== 'bundle') continue;
+      const dir = m.bundleDir ? path.join(os.homedir(), m.bundleDir) : DEFAULT_BUNDLE;
+      if (!bundleGroups.has(dir)) bundleGroups.set(dir, []);
+      bundleGroups.get(dir).push([name, m]);
+    }
     const oldBundle = settings.packages.find((p) => String(p.source || '').includes('bundle'));
-    const bundleSource = oldBundle ? oldBundle.source : (os.homedir() + '/.pi/bundle');
-    managed.push({
-      source: bundleSource,
-      extensions: bundleEntries.flatMap(([, m]) => (m.extensionPaths || []).map(toExpr)),
-    });
+    for (const [dir, entries] of bundleGroups) {
+      const isDefault = dir === DEFAULT_BUNDLE;
+      const source = isDefault ? (oldBundle ? oldBundle.source : DEFAULT_BUNDLE) : dir;
+      managed.push({
+        source,
+        extensions: entries.flatMap(([, m]) => (m.extensionPaths || []).map(toExpr)),
+      });
+    }
     // git 包 → 每个包一个条目
     const gitRoot = path.join(os.homedir(), '.pi', 'packages');
     for (const [name, m] of Object.entries(cfg.packages)) {
@@ -270,7 +282,14 @@ cmd_update() {
 # - 否则: npm install <pkg>@<version>（npm registry）
 bundle_install() {
   local pkg="$1" version="$2"
-  local git_url
+  local dir git_url
+  dir=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.bundleDir||'')")
+  if [[ -z "$dir" ]]; then
+    dir="$BUNDLE_DIR"
+  else
+    dir="$HOME/$dir"
+  fi
+  mkdir -p "$dir"
   git_url=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.gitUrl||'')")
   if [[ -n "$git_url" ]]; then
     # github:user/repo#branch → git+https://github.com/user/repo.git#branch
@@ -286,10 +305,10 @@ bundle_install() {
     else
       https_url="$git_url"
     fi
-    echo "  [bundle-git] npm install $https_url"
-    (cd "$BUNDLE_DIR" && npm install "$https_url" 2>&1 | tail -2)
+    echo "  [bundle-git] npm install $https_url -> $dir"
+    (cd "$dir" && npm install "$https_url" 2>&1 | tail -2)
   else
-    (cd "$BUNDLE_DIR" && npm install "$pkg@$version" 2>&1 | tail -2)
+    (cd "$dir" && npm install "$pkg@$version" 2>&1 | tail -2)
   fi
 }
 
@@ -297,6 +316,28 @@ cmd_install() {
   echo -e "${BLUE}安装所有配置的包...${NC}"
 
   mkdir -p "$BUNDLE_DIR"
+  # 收集所有 bundle 目录(默认 + 各 bundleDir), 确保每个都有 package.json
+  json_keys "$PACKAGES_FILE" | while IFS= read -r p; do
+    local bd
+    bd=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$p']?.bundleDir||'')")
+    if [[ -n "$bd" ]]; then
+      local d="$HOME/$bd"
+      mkdir -p "$d"
+      if [[ ! -f "$d/package.json" ]]; then
+        cat > "$d/package.json" << 'EOF'
+{
+  "name": "pi-shiki",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {},
+  "pi": {
+    "extensions": []
+  }
+}
+EOF
+      fi
+    fi
+  done
   if [[ ! -f "$BUNDLE_DIR/package.json" ]]; then
     cat > "$BUNDLE_DIR/package.json" << 'EOF'
 {
@@ -329,22 +370,31 @@ EOF
     fi
   done
 
-  # 同步 bundle 的 pi.extensions 列表
+  # 同步各 bundle 目录的 pi.extensions 列表(按 bundleDir 分组)
   node -e "
     const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
     const cfg = JSON.parse(fs.readFileSync('$PACKAGES_FILE', 'utf8'));
-    const bundlePath = '$BUNDLE_DIR/package.json';
-    const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
-    const paths = [];
+    const groups = new Map();
     for (const [name, meta] of Object.entries(cfg.packages)) {
       if (meta.disabled) continue;
       if (meta.installTarget !== 'bundle') continue;
-      if (Array.isArray(meta.extensionPaths)) paths.push(...meta.extensionPaths);
+      const dir = meta.bundleDir ? path.join(os.homedir(), meta.bundleDir) : '$BUNDLE_DIR';
+      if (!groups.has(dir)) groups.set(dir, []);
+      if (Array.isArray(meta.extensionPaths)) groups.get(dir).push(...meta.extensionPaths);
     }
-    bundle.pi = bundle.pi || {};
-    bundle.pi.extensions = paths;
-    fs.writeFileSync(bundlePath, JSON.stringify(bundle, null, 2) + '\n');
-    console.log('已同步 pi.extensions: ' + paths.length + ' 项');
+    let total = 0;
+    for (const [dir, paths] of groups) {
+      const bundlePath = path.join(dir, 'package.json');
+      const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
+      bundle.pi = bundle.pi || {};
+      bundle.pi.extensions = paths;
+      fs.writeFileSync(bundlePath, JSON.stringify(bundle, null, 2) + '\n');
+      total += paths.length;
+      console.log('已同步 pi.extensions: ' + paths.length + ' 项 -> ' + dir);
+    }
+    console.log('共 ' + total + ' 项');
   "
   
   # 同步 ~/.pi/agent/settings.json 的受管包扩展（真源: packages.json）
