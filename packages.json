@@ -11,34 +11,6 @@
       "installTarget": "npm-global",
       "homepage": "https://www.npmjs.com/package/@agegr/pi-web"
     },
-    "@juicesharp/rpiv-ask-user-question": {
-      "version": "latest",
-      "type": "extension",
-      "description": "问用户问题 - 结构化问答界面",
-      "extensions": [
-        "rpiv-ask-user-question"
-      ],
-      "extensionPaths": [
-        "node_modules/@juicesharp/rpiv-ask-user-question/index.ts"
-      ],
-      "installTarget": "bundle",
-      "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-ask-user-question",
-      "disabled": true
-    },
-    "@juicesharp/rpiv-todo": {
-      "version": "latest",
-      "type": "extension",
-      "description": "任务管理 - 多步骤任务追踪",
-      "extensions": [
-        "rpiv-todo"
-      ],
-      "extensionPaths": [
-        "node_modules/@juicesharp/rpiv-todo/index.ts"
-      ],
-      "installTarget": "bundle",
-      "homepage": "https://www.npmjs.com/package/@juicesharp/rpiv-todo",
-      "disabled": true
-    },
     "@narumitw/pi-goal": {
       "version": "latest",
       "type": "extension",
