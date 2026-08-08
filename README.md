@@ -98,12 +98,25 @@ piweb-stop      # 停止 Pi Web
 | `category` | 包分类（可选）：`bridge` 桥接 / `ui` 界面 / `task` 任务 / `web` Web / `mcp` MCP / `tool` 工具 |
 | `version` | 通常为 `latest` |
 
+## dev-config（Pi 配置模板）
+
+Pi Agent 的新机配置模板（密钥用占位符，见知识库）。由 `setup.sh`（wsl2-dev-setup）复制到实际位置：
+
+| 文件 | 目标位置 | 说明 |
+|------|----------|------|
+| `dev-config/pi/settings.json` | `~/.pi/agent/settings.json` | 种子配置（packages 留空，由 `pi-ctl sync-agent` 生成受管扩展列表） |
+| `dev-config/pi/mcp.json` | `~/.config/mcp/mcp.json` | pi-mcp-adapter 的 MCP 服务器清单（`__USER_HOME__` 占位符） |
+| `dev-config/pi/edit-hooks.json` | `~/.pi/agent/edit-hooks.json` | 编辑钩子（保存后自动校验） |
+
+> 模型路由（models.json）与扩展个性化配置（pi-shiki-subagents.json）不含模板：属个人配置，经验沉淀在知识库。
+
 ## 与其他仓库的关系
 
 | 仓库 | 职责 |
 |------|------|
-| **pi-PackgeManager**（本仓库） | Pi Web + 扩展清单、复用安装、追溯 |
-| **wsl2-dev-setup** | WSL2 整机环境；Pi 包部分引用本仓库 |
+| **pi-PackgeManager**（本仓库） | Pi Web + 扩展清单、复用安装、追溯、Pi 配置模板（dev-config/） |
+| **pi-shiki-subagents** | 扩展代码 + 默认 agents 配置（`src/adapters/agents-default.json`） |
+| **wsl2-dev-setup** | WSL2 环境层：cliproxyapi + dotfiles + 一键引导（Pi 部分委托本仓库） |
 | **Pi 本体** | 单独用 npm 安装，不在本仓库管理 |
 
 ## 当前清单
@@ -111,14 +124,14 @@ piweb-stop      # 停止 Pi Web
 | 包 | 类型 | 说明 |
 |----|------|------|
 | @agegr/pi-web | tool | Pi Web UI |
-| @juicesharp/rpiv-ask-user-question | extension | 结构化问答 |
-| @juicesharp/rpiv-todo | extension | 任务列表 |
 | @narumitw/pi-goal | extension | 目标管理 |
 | pi-edit-hooks | extension | 编辑钩子 |
 | pi-hashline-edit-pro | extension | Hashline 编辑 Pro (哈希锚点) |
 | pi-mcp-adapter | extension | MCP 适配器 |
 | pi-web-access | extension | Web 搜索/抓取 |
 | pi-feishu-lark | extension | 飞书/Lark 桥接（手机对话 Pi，长连接） |
+| pi-shiki-subagents | extension | 轻量多 agent 协调层（git 源，refactor 分支） |
+| pi-shiki-todo | extension | 任务管理（rpiv-todo 替代） |
 
 ## 依赖
 

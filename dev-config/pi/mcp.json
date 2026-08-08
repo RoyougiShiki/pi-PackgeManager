@@ -1,0 +1,14 @@
+{
+  "settings": {
+    "directTools": true
+  },
+  "mcpServers": {
+    "codebase-memory": {
+      "command": "__USER_HOME__/.local/bin/codebase-memory-mcp",
+      "args": [
+        "--ui=true",
+        "--port=9749"
+      ]
+    }
+  }
+}

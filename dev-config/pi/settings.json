@@ -1,0 +1,19 @@
+{
+  "@note": "packages(扩展清单)由 pi-PackgeManager 管理: setup.sh 复制本文件后执行 pi-ctl sync-agent 生成, 请勿在此维护扩展列表",
+  "theme": "dark",
+  "quietStartup": false,
+  "packages": [],
+  "pi-mcp-adapter": {
+  },
+  "pi-agents": {},
+  "lastChangelogVersion": "0.83.0",
+  "defaultProvider": "vc",
+  "defaultModel": "glm-5.2",
+  "defaultThinkingLevel": "max",
+  "hideThinkingBlock": true,
+  "compaction": {
+    "enabled": true
+  },
+  "steeringMode": "one-at-a-time",
+  "followUpMode": "one-at-a-time"
+}
