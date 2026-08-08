@@ -280,6 +280,54 @@ cmd_update() {
 # 安装包到 bundle（installTarget=bundle）:
 # - 有 gitUrl 时: npm install <gitUrl>（git 依赖装进 bundle/node_modules）
 # - 否则: npm install <pkg>@<version>（npm registry）
+
+# 确保 bundle 目录有带 name/version/pi.extensions 的 package.json
+# （全新目录直接 npm install 时，npm 自动生成的 package.json 缺这些字段，
+#   导致 pi-web 显示包名/版本未知、扩展资源解析为空）
+ensure_bundle_package_json() {
+  local dir="$1" name="${2:-}"
+  mkdir -p "$dir"
+  if [[ ! -f "$dir/package.json" ]]; then
+    [[ -z "$name" ]] && name=$(basename "$dir")
+    cat > "$dir/package.json" << EOF
+{
+  "name": "$name",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {},
+  "pi": {
+    "extensions": []
+  }
+}
+EOF
+  fi
+}
+
+# 同步 bundle 目录的 pi.extensions（真源: packages.json 的 extensionPaths，按 bundleDir 分组）
+sync_bundle_extensions() {
+  local dir="$1"
+  node -e "
+    const fs = require('fs');
+    const os = require('os');
+    const path = require('path');
+    const cfg = JSON.parse(fs.readFileSync('$PACKAGES_FILE', 'utf8'));
+    const target = '$dir';
+    const paths = [];
+    for (const [name, meta] of Object.entries(cfg.packages)) {
+      if (meta.disabled || meta.installTarget !== 'bundle') continue;
+      const d = meta.bundleDir ? path.join(os.homedir(), meta.bundleDir) : '$BUNDLE_DIR';
+      if (d === target && Array.isArray(meta.extensionPaths)) paths.push(...meta.extensionPaths);
+    }
+    const bundlePath = path.join(target, 'package.json');
+    if (!fs.existsSync(bundlePath)) { console.log('  跳过(无 package.json): ' + target); process.exit(0); }
+    const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
+    bundle.pi = bundle.pi || {};
+    bundle.pi.extensions = paths;
+    fs.writeFileSync(bundlePath, JSON.stringify(bundle, null, 2) + '\n');
+    console.log('  已同步 pi.extensions: ' + paths.length + ' 项 -> ' + target);
+  "
+}
+
 bundle_install() {
   local pkg="$1" version="$2"
   local dir git_url
@@ -289,7 +337,7 @@ bundle_install() {
   else
     dir="$HOME/$dir"
   fi
-  mkdir -p "$dir"
+  ensure_bundle_package_json "$dir"
   git_url=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$pkg']?.gitUrl||'')")
   if [[ -n "$git_url" ]]; then
     # github:user/repo#branch → git+https://github.com/user/repo.git#branch
@@ -310,6 +358,7 @@ bundle_install() {
   else
     (cd "$dir" && npm install "$pkg@$version" 2>&1 | tail -2)
   fi
+  sync_bundle_extensions "$dir"
 }
 
 cmd_install() {
@@ -321,36 +370,10 @@ cmd_install() {
     local bd
     bd=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$p']?.bundleDir||'')")
     if [[ -n "$bd" ]]; then
-      local d="$HOME/$bd"
-      mkdir -p "$d"
-      if [[ ! -f "$d/package.json" ]]; then
-        cat > "$d/package.json" << 'EOF'
-{
-  "name": "pi-shiki",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {},
-  "pi": {
-    "extensions": []
-  }
-}
-EOF
-      fi
+      ensure_bundle_package_json "$HOME/$bd" "pi-shiki"
     fi
   done
-  if [[ ! -f "$BUNDLE_DIR/package.json" ]]; then
-    cat > "$BUNDLE_DIR/package.json" << 'EOF'
-{
-  "name": "omi-toolkit",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {},
-  "pi": {
-    "extensions": []
-  }
-}
-EOF
-  fi
+  ensure_bundle_package_json "$BUNDLE_DIR" "omi-toolkit"
 
   json_keys "$PACKAGES_FILE" | while IFS= read -r pkg; do
     [[ -z "$pkg" ]] && continue
@@ -371,31 +394,14 @@ EOF
   done
 
   # 同步各 bundle 目录的 pi.extensions 列表(按 bundleDir 分组)
-  node -e "
-    const fs = require('fs');
-    const os = require('os');
-    const path = require('path');
-    const cfg = JSON.parse(fs.readFileSync('$PACKAGES_FILE', 'utf8'));
-    const groups = new Map();
-    for (const [name, meta] of Object.entries(cfg.packages)) {
-      if (meta.disabled) continue;
-      if (meta.installTarget !== 'bundle') continue;
-      const dir = meta.bundleDir ? path.join(os.homedir(), meta.bundleDir) : '$BUNDLE_DIR';
-      if (!groups.has(dir)) groups.set(dir, []);
-      if (Array.isArray(meta.extensionPaths)) groups.get(dir).push(...meta.extensionPaths);
-    }
-    let total = 0;
-    for (const [dir, paths] of groups) {
-      const bundlePath = path.join(dir, 'package.json');
-      const bundle = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
-      bundle.pi = bundle.pi || {};
-      bundle.pi.extensions = paths;
-      fs.writeFileSync(bundlePath, JSON.stringify(bundle, null, 2) + '\n');
-      total += paths.length;
-      console.log('已同步 pi.extensions: ' + paths.length + ' 项 -> ' + dir);
-    }
-    console.log('共 ' + total + ' 项');
-  "
+  json_keys "$PACKAGES_FILE" | while IFS= read -r p; do
+    local bd
+    bd=$(json_get "$PACKAGES_FILE" "console.log(data.packages['$p']?.bundleDir||'')")
+    if [[ -n "$bd" ]]; then
+      sync_bundle_extensions "$HOME/$bd"
+    fi
+  done
+  sync_bundle_extensions "$BUNDLE_DIR"
   
   # 同步 ~/.pi/agent/settings.json 的受管包扩展（真源: packages.json）
   sync_agent_settings
