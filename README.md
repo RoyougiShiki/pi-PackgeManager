@@ -134,6 +134,7 @@ Pi Agent 的新机配置模板（密钥用占位符，见知识库）。由 `set
 | pi-feishu-lark | extension | 飞书/Lark 桥接（手机对话 Pi，长连接） |
 | pi-shiki-subagents | extension | 轻量多 agent 协调层（git 源，refactor 分支） |
 | pi-shiki-todo | extension | 任务管理（rpiv-todo 替代） |
+| pi-vision-handoff | extension | 视觉桥接：纯文本模型读图（mimo-v2.5-free 自动描述，带 fallback） |
 
 ## 依赖
 
