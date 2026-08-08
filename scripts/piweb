@@ -90,7 +90,7 @@ fi
 
 # 清掉卡住的旧 next 进程（仅本机 30141 场景）
 if command -v pgrep >/dev/null 2>&1; then
-  pgrep -af 'next-server|next/dist/bin/next start' 2>/dev/null | rg -q . && {
+  pgrep -af 'next-server|next/dist/bin/next start' 2>/dev/null | grep -q . && {
     pkill -f 'next/dist/bin/next start' 2>/dev/null || true
     pkill -f 'next-server' 2>/dev/null || true
     sleep 1
@@ -105,7 +105,7 @@ fi
 nohup env PI_WEB_NO_OPEN=1 pi-web --no-open -H "${HOST}" -p "${PORT}" >"${LOG}" 2>&1 &
 PID=$!
 
-for _ in $(seq 1 30); do
+for _ in $(seq 1 60); do
   if is_up; then
     echo "Pi Web 已启动：${URL}"
     echo "日志：${LOG}  PID：${PID}"
@@ -120,9 +120,10 @@ for _ in $(seq 1 30); do
     tail -n 40 "${LOG}" >&2 || true
     exit 1
   fi
-  sleep 0.3
+  sleep 0.5
 done
 
-echo "启动超时，最近日志：" >&2
+echo "启动超时（已等待 30 秒），最近日志：" >&2
 tail -n 40 "${LOG}" >&2 || true
+echo "提示：服务可能仍在启动中，可手动检查：curl -fsS ${URL}/ 或查看日志 ${LOG}" >&2
 exit 1
