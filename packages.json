@@ -123,6 +123,20 @@
       ],
       "homepage": "https://github.com/RoyougiShiki/Pi-shiki-todo",
       "bundleDir": ".pi/bundle-pi-shiki"
+    },
+    "pi-vision-handoff": {
+      "version": "latest",
+      "type": "extension",
+      "category": "vision",
+      "description": "视觉桥接 - 纯文本模型读图（自动替换为视觉模型描述，支持 fallback）",
+      "extensions": [
+        "pi-vision-handoff"
+      ],
+      "extensionPaths": [
+        "node_modules/pi-vision-handoff/vision-handoff.ts"
+      ],
+      "installTarget": "bundle",
+      "homepage": "https://www.npmjs.com/package/pi-vision-handoff"
     }
   }
 }
