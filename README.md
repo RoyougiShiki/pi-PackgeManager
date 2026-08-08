@@ -108,7 +108,9 @@ Pi Agent 的新机配置模板（密钥用占位符，见知识库）。由 `set
 | `dev-config/pi/mcp.json` | `~/.config/mcp/mcp.json` | pi-mcp-adapter 的 MCP 服务器清单（`__USER_HOME__` 占位符） |
 | `dev-config/pi/edit-hooks.json` | `~/.pi/agent/edit-hooks.json` | 编辑钩子（保存后自动校验） |
 
-> 模型路由（models.json）与扩展个性化配置（pi-shiki-subagents.json）不含模板：属个人配置，经验沉淀在知识库。
+> 扩展个性化配置（pi-shiki-subagents.json）不含模板：属个人配置，默认行为由 pi-shiki-subagents 仓库的 `agents-default.json` 承担，经验沉淀在知识库。
+>
+> 复制后需手工项：`models.json` 填各家 API key；扩展运行时凭证（如飞书桥接 `~/.pi/agent/feishu/config.json`）自行配置。
 
 ## 与其他仓库的关系
 
