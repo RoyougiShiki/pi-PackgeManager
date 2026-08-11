@@ -90,20 +90,6 @@
       "installTarget": "bundle",
       "homepage": "https://www.npmjs.com/package/pi-feishu-lark"
     },
-    "pi-edge-bridge": {
-      "version": "master",
-      "type": "extension",
-      "description": "Edge 桥接管家 - WSL pi 控制 Windows Edge（零管理员自动部署转发器+Edge，懒加载/自愈/防并发）",
-      "installTarget": "bundle",
-      "gitUrl": "github:RoyougiShiki/pi-edge-bridge#master",
-      "repoUrl": "https://github.com/RoyougiShiki/pi-edge-bridge.git",
-      "branch": "master",
-      "extensionPaths": [
-        "node_modules/pi-edge-bridge/src/index.ts"
-      ],
-      "homepage": "https://github.com/RoyougiShiki/pi-edge-bridge",
-      "bundleDir": ".pi/bundle-pi-shiki"
-    },
     "pi-shiki-subagents": {
       "version": "refactor/mode-first-stabilization",
       "type": "extension",
