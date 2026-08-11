@@ -9,6 +9,10 @@
         "--ui=true",
         "--port=9749"
       ]
+    },
+    "grep_app": {
+      "url": "https://mcp.grep.app",
+      "auth": false
     }
   }
 }
