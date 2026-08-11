@@ -137,6 +137,20 @@
       ],
       "installTarget": "bundle",
       "homepage": "https://www.npmjs.com/package/pi-vision-handoff"
+    },
+    "pi-browser": {
+      "version": "master",
+      "type": "extension",
+      "description": "长连接 CDP 控制 Edge/Chrome（真实输入免验证码，每任务 1 次 allow，自动链路管理，零依赖）",
+      "installTarget": "bundle",
+      "gitUrl": "github:RoyougiShiki/pi-browser#master",
+      "repoUrl": "https://github.com/RoyougiShiki/pi-browser.git",
+      "branch": "master",
+      "extensionPaths": [
+        "node_modules/pi-browser/src/index.ts"
+      ],
+      "homepage": "https://github.com/RoyougiShiki/pi-browser",
+      "bundleDir": ".pi/bundle-pi-shiki"
     }
   }
 }
