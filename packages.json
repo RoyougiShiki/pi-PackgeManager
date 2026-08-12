@@ -137,20 +137,6 @@
       ],
       "installTarget": "bundle",
       "homepage": "https://www.npmjs.com/package/pi-vision-handoff"
-    },
-    "pi-shiki-browser": {
-      "version": "master",
-      "type": "extension",
-      "description": "Pi-shiki-browser 浏览器控制：长连接 CDP 控制 Edge/Chrome（真实输入免验证码，每任务 1 次 allow，本机直连 + WSL→Windows 桥接，零依赖）",
-      "installTarget": "bundle",
-      "gitUrl": "github:RoyougiShiki/Pi-shiki-browser#master",
-      "repoUrl": "https://github.com/RoyougiShiki/Pi-shiki-browser.git",
-      "branch": "master",
-      "extensionPaths": [
-        "node_modules/pi-shiki-browser/index.ts"
-      ],
-      "homepage": "https://github.com/RoyougiShiki/Pi-shiki-browser",
-      "bundleDir": ".pi/bundle-pi-shiki"
     }
   }
 }
