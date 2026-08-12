@@ -96,6 +96,7 @@ piweb-stop      # 停止 Pi Web
 | `extensions` | 该包启用的扩展名 |
 | `category` | 包分类（可选）：`bridge` 桥接 / `ui` 界面 / `task` 任务 / `web` Web / `mcp` MCP / `tool` 工具 |
 | `version` | 通常为 `latest` |
+| `disabled` | `true` = 本机不安装此包（可选安装，不同机器可裁剪；`pi-ctl` 自动跳过） |
 
 ## dev-config（Pi 配置模板）
 
