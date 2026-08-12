@@ -65,7 +65,6 @@ piweb-stop      # 停止 Pi Web
 
 版本策略：清单统一使用 `latest`（GitHub 源包除外）。
 
-版本策略：清单统一使用 `latest`（GitHub 源包除外）。
 
 ## packages.json
 
