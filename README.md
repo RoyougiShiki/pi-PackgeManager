@@ -126,7 +126,6 @@ Pi Agent 的新机配置模板（密钥用占位符，见知识库）。由 `set
 | 包 | 类型 | 说明 |
 |----|------|------|
 | @agegr/pi-web | tool | Pi Web UI |
-| @narumitw/pi-goal | extension | 目标管理 |
 | pi-edit-hooks | extension | 编辑钩子 |
 | pi-hashline-edit-pro | extension | Hashline 编辑 Pro (哈希锚点) |
 | pi-mcp-adapter | extension | MCP 适配器 |

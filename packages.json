@@ -11,19 +11,6 @@
       "installTarget": "npm-global",
       "homepage": "https://www.npmjs.com/package/@agegr/pi-web"
     },
-    "@narumitw/pi-goal": {
-      "version": "latest",
-      "type": "extension",
-      "description": "目标管理 - 目标追踪和完成验证",
-      "extensions": [
-        "pi-goal"
-      ],
-      "extensionPaths": [
-        "node_modules/@narumitw/pi-goal/src/index.ts"
-      ],
-      "installTarget": "bundle",
-      "homepage": "https://www.npmjs.com/package/@narumitw/pi-goal"
-    },
     "pi-edit-hooks": {
       "version": "latest",
       "type": "extension",
