@@ -124,6 +124,19 @@
       ],
       "installTarget": "bundle",
       "homepage": "https://www.npmjs.com/package/pi-vision-handoff"
+    },
+    "pi-codex-goal": {
+      "version": "latest",
+      "type": "extension",
+      "description": "Codex 风格 goal 扩展 - 长任务目标追踪(契约/预算/续跑)，配合 goal-draft skill",
+      "extensions": [
+        "pi-codex-goal"
+      ],
+      "extensionPaths": [
+        "node_modules/pi-codex-goal/src/index.ts"
+      ],
+      "installTarget": "bundle",
+      "homepage": "https://www.npmjs.com/package/pi-codex-goal"
     }
   }
 }
