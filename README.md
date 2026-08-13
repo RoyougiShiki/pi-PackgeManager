@@ -106,7 +106,6 @@ Pi Agent 的新机配置模板（密钥用占位符，见知识库）。由 `set
 |------|----------|------|
 | `dev-config/pi/settings.json` | `~/.pi/agent/settings.json` | 种子配置（packages 留空，由 `pi-ctl sync-agent` 生成受管扩展列表） |
 | `dev-config/pi/mcp.json` | `~/.config/mcp/mcp.json` | pi-mcp-adapter 的 MCP 服务器清单（`__USER_HOME__` 占位符） |
-| `dev-config/pi/edit-hooks.json` | `~/.pi/agent/edit-hooks.json` | 编辑钩子（保存后自动校验） |
 
 > 扩展个性化配置（pi-shiki-subagents.json）不含模板：属个人配置，默认行为由 pi-shiki-subagents 仓库的 `agents-default.json` 承担，经验沉淀在知识库。
 >
@@ -126,7 +125,6 @@ Pi Agent 的新机配置模板（密钥用占位符，见知识库）。由 `set
 | 包 | 类型 | 说明 |
 |----|------|------|
 | @agegr/pi-web | tool | Pi Web UI |
-| pi-edit-hooks | extension | 编辑钩子 |
 | pi-hashline-edit-pro | extension | Hashline 编辑 Pro (哈希锚点) |
 | pi-mcp-adapter | extension | MCP 适配器 |
 | pi-web-access | extension | Web 搜索/抓取 |

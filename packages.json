@@ -11,19 +11,6 @@
       "installTarget": "npm-global",
       "homepage": "https://www.npmjs.com/package/@agegr/pi-web"
     },
-    "pi-edit-hooks": {
-      "version": "latest",
-      "type": "extension",
-      "description": "编辑钩子 - 文件编辑后自动执行脚本",
-      "extensions": [
-        "pi-edit-hooks"
-      ],
-      "extensionPaths": [
-        "node_modules/pi-edit-hooks/src/index.ts"
-      ],
-      "installTarget": "bundle",
-      "homepage": "https://www.npmjs.com/package/pi-edit-hooks"
-    },
     "pi-hashline-edit-pro": {
       "version": "latest",
       "type": "extension",
