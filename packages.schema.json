@@ -57,7 +57,7 @@
           },
           "gitUrl": {
             "type": "string",
-            "description": "git 依赖 spec（installTarget=bundle 时可选）：npm 的 github:user/repo#branch 形式，装进 ~/.pi/bundle/node_modules。如 github:RoyougiShiki/Pi-shiki-subagents#refactor/mode-first-stabilization"
+            "description": "git 依赖 spec（installTarget=bundle 时可选）：npm 的 github:user/repo#branch 形式，装进 bundleDir 的 node_modules。如 github:RoyougiShiki/Pi-shiki-todo#master"
           },
           "branch": {
             "type": "string",

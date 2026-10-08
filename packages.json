@@ -64,23 +64,6 @@
       "installTarget": "bundle",
       "homepage": "https://www.npmjs.com/package/pi-feishu-lark"
     },
-    "pi-shiki-subagents": {
-      "version": "refactor/mode-first-stabilization",
-      "type": "extension",
-      "description": "Pi-shiki-subagents Pi adapter - 轻量多 agent 协调层（git 源码仓库）",
-      "extensions": [
-        "pi-shiki-subagents"
-      ],
-      "installTarget": "bundle",
-      "repoUrl": "https://github.com/RoyougiShiki/Pi-shiki-subagents.git",
-      "branch": "refactor/mode-first-stabilization",
-      "extensionPaths": [
-        "node_modules/pi-shiki-subagents/src/pi/core/pi-shiki-subagents.ts"
-      ],
-      "homepage": "https://github.com/RoyougiShiki/Pi-shiki-subagents",
-      "gitUrl": "github:RoyougiShiki/Pi-shiki-subagents#refactor/mode-first-stabilization",
-      "bundleDir": ".pi/bundle-pi-shiki"
-    },
     "pi-shiki-todo": {
       "version": "master",
       "type": "extension",
@@ -97,20 +80,6 @@
       ],
       "homepage": "https://github.com/RoyougiShiki/Pi-shiki-todo",
       "bundleDir": ".pi/bundle-pi-shiki"
-    },
-    "pi-vision-handoff": {
-      "version": "latest",
-      "type": "extension",
-      "category": "vision",
-      "description": "视觉桥接 - 纯文本模型读图（自动替换为视觉模型描述，支持 fallback）",
-      "extensions": [
-        "pi-vision-handoff"
-      ],
-      "extensionPaths": [
-        "node_modules/pi-vision-handoff/vision-handoff.ts"
-      ],
-      "installTarget": "bundle",
-      "homepage": "https://www.npmjs.com/package/pi-vision-handoff"
     },
     "pi-codex-goal": {
       "version": "latest",
